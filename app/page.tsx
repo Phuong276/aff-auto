@@ -1,16 +1,60 @@
-import Image from "next/image";
+"use client";
+import React, { useState } from 'react';
+import { CustomService } from '@/src/custom';
+import { HttpService } from '@nestjs/axios';
 
-export default function Home() {
+const httpService: HttpService = new HttpService();
+const customService: CustomService = new CustomService(httpService);
+
+function extractLinksFromCode(code: any) {
+  const regex = /(https:\/\/shope\.ee\/\w+)/g;
+  const matches = code.match(regex);
+  return matches;
+}
+
+export default function MyComponent() {
+  
+  const [textValue, setTextValue] = useState('');
+  const [copiedValue, setCopiedValue] = useState('');
+
+  const handleTextareaChange = (event: any) => {
+    const value = event.target.value;
+    setTextValue(value);
+  };
+
+  const handleButtonClick = () => {
+    const links = extractLinksFromCode(textValue);
+    const a = customService.newLink('https://shope.ee/6fJXbrZLQC');
+    a.then((result) => {
+      console.log(result);
+    }).catch((error) => {
+      console.error(error);
+    });
+    setCopiedValue(textValue);
+  };
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-       
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-        </div>
+    <div>
+      <textarea
+        value={textValue}
+        onChange={handleTextareaChange}
+        placeholder="Nhập thông tin vào đây"
+        style={{ color: 'black', height: '50vh', width: '50vw' }}
+      ></textarea>
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <button
+          onClick={handleButtonClick}
+          style={{ border: '1px solid black', padding: '10px 20px' }}
+        >
+          Chuyển đổi
+        </button>
       </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-      </div>
-    </main>
+      <textarea
+        value={copiedValue}
+        readOnly
+        placeholder="Thông tin mới"
+        style={{ color: 'black', height: '50vh', width: '50vw' }}
+      ></textarea>
+    </div>
   );
 }
